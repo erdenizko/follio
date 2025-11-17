@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  password      String?
+  emailVerified Boolean        @default(false)
+  image         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  jobs          ThumbnailJob[]
+  logs          RequestLog[]
+  projects      CoverProject[]
+  galleryImages GalleryImage[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  providerId   String
+  accountId    String
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken  String?
+  refreshToken String?
+  idToken      String?
+  expiresAt    DateTime?
+  password     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model ThumbnailJob {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id])
+  status              JobStatus
+  aspectRatioId       String
+  aspectRatioString   String
+  customWidth         Int?
+  customHeight        Int?
+  inputImage1         Json
+  inputImage2         Json
+  inputImage3         Json
+  inputImagesMetadata Json
+  falResultUrl        String?
+  falResultUrls       Json?
+  falRequestId        String?
+  errorMessage        String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  projectName         String?
+  projectSlug         String?
+  coverVersions       CoverVersion[]
+  galleryImages       GalleryImage[]
+}
+
+model RequestLog {
+  id                    String   @id @default(cuid())
+  userId                String?
+  user                  User?    @relation(fields: [userId], references: [id])
+  endpoint              String
+  requestPayloadSummary Json
+  responseStatus        Int
+  responseTimeMs        Int
+  aspectRatioId         String?
+  modelId               String?
+  inputImageCount       Int?
+  falRequestId          String?
+  createdAt             DateTime @default(now())
+}
+
+model CoverProject {
+  id                  String         @id @default(cuid())
+  userId              String
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String
+  slug                String
+  latestVersionNumber Int            @default(0)
+  librarySelected          Boolean                 @default(false)
+  libraryGenerationStatus  LibraryGenerationStatus @default(WAITING)
+  libraryGenerationJobId   String?
+  libraryGenerationQueuedAt    DateTime?
+  libraryGenerationCompletedAt DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  versions            CoverVersion[]
+  galleryImages       GalleryImage[]
+
+  @@unique([userId, slug])
+  @@index([userId, updatedAt])
+}
+
+model CoverVersion {
+  id                 String        @id @default(cuid())
+  projectId          String
+  project            CoverProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  thumbnailJobId     String?
+  thumbnailJob       ThumbnailJob? @relation(fields: [thumbnailJobId], references: [id], onDelete: Cascade)
+  versionNumber      Int
+  label              String
+  selectedImageUrl   String
+  generatedImageUrls Json?
+  sourceImage1Url    String?
+  sourceImage2Url    String?
+  sourceImage3Url    String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@unique([projectId, versionNumber])
+  @@index([projectId])
+}
+
+model GalleryImage {
+  id                 String   @id @default(cuid())
+  userId             String
+  jobId              String?
+  projectId          String?
+  projectName        String?
+  projectSlug        String?
+  isSourceAsset      Boolean  @default(false)
+  uploadUrl          String
+  checksum           String
+  mimeType           String
+  sizeBytes          Int
+  width              Int?
+  height             Int?
+  aspectRatioId      String?
+  aspectRatioString  String?
+  metadata           Json?
+  cloudinaryPublicId String?
+  cloudinaryAssetId  String?
+  cloudinaryFolder   String?
+  cloudinaryVersion  Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job     ThumbnailJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  project CoverProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([jobId])
+  @@index([userId, projectSlug])
+  @@index([projectId])
+  @@unique([userId, checksum])
+}
+
+enum LibraryGenerationStatus {
+  WAITING
+  GENERATING
+  COMPLETED
+  FAILED
+}
