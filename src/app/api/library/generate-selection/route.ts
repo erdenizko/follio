@@ -164,7 +164,6 @@ async function runGenerationForProject(project: ProjectWithAssets, userId: strin
     const aspectRatio = deriveAspectRatio(inputs);
     const uploadedInputs = await ensureImagesHaveCloudinaryUrls(inputs, {
       userId,
-      projectId: project.id,
     });
     const sanitized = uploadedInputs.map(sanitizeImageMetadata);
 

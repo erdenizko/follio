@@ -85,7 +85,7 @@ export type SerializedCoverVersion = {
   label: string;
   selectedImageUrl: string;
   createdAt: string;
-  thumbnailJob: SerializedThumbnailJob;
+  thumbnailJob: SerializedThumbnailJob | null;
 };
 
 export type SerializedCoverProject = {
@@ -240,10 +240,10 @@ export function GeneratorApp({
         initialProject?.name ??
         "",
       aspectRatioId:
-        initialSelectedVersion?.thumbnailJob.aspectRatioId ??
+        initialSelectedVersion?.thumbnailJob?.aspectRatioId ??
         DEFAULT_ASPECT_RATIO_ID,
-      customWidth: initialSelectedVersion?.thumbnailJob.customWidth ?? undefined,
-      customHeight: initialSelectedVersion?.thumbnailJob.customHeight ?? undefined,
+      customWidth: initialSelectedVersion?.thumbnailJob?.customWidth ?? undefined,
+      customHeight: initialSelectedVersion?.thumbnailJob?.customHeight ?? undefined,
     }),
     [initialProject, initialSelectedVersion],
   );
@@ -252,7 +252,7 @@ export function GeneratorApp({
     initialProject ?? null,
   );
   const [images, setImages] = useState<UploadedImage[]>(() =>
-    initialSelectedVersion
+    initialSelectedVersion?.thumbnailJob
       ? buildUploadedImagesFromMetadata(
         initialSelectedVersion.thumbnailJob.inputImagesMetadata,
       )
@@ -307,7 +307,7 @@ export function GeneratorApp({
   }, [initialProject]);
 
   useEffect(() => {
-    if (!initialSelectedVersion) {
+    if (!initialSelectedVersion?.thumbnailJob) {
       return;
     }
 
@@ -712,7 +712,7 @@ export function GeneratorApp({
     (versionId: string) => {
       if (!project) return;
       const version = project.versions.find((entry) => entry.id === versionId);
-      if (!version) return;
+      if (!version?.thumbnailJob) return;
 
       setSelectedVersionId(version.id);
       setCanCreateNewCover(false);

@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import type { SocialProviders } from "better-auth/social";
 import { prisma } from "@/lib/prisma";
 
 const baseURL =
@@ -9,6 +8,12 @@ const baseURL =
 if (!baseURL) {
   throw new Error("Configure BETTER_AUTH_URL or NEXT_PUBLIC_APP_URL for authentication.");
 }
+
+type SocialProviders = Record<string, {
+  clientId: string;
+  clientSecret: string;
+  enabled: boolean;
+}>;
 
 const socialProviders: SocialProviders | undefined = (() => {
   const providers: SocialProviders = {};

@@ -19,7 +19,9 @@ type HomeProps = {
   };
 };
 
-function serializeJob(job: ThumbnailJob): SerializedThumbnailJob {
+function serializeJob(job: ThumbnailJob | null): SerializedThumbnailJob | null {
+  if (!job) return null;
+  
   return {
     id: job.id,
     status: job.status,
@@ -58,7 +60,9 @@ export default async function Home({ searchParams }: HomeProps) {
     take: 10,
   });
 
-  const serializedJobs: SerializedThumbnailJob[] = jobs.map(serializeJob);
+  const serializedJobs: SerializedThumbnailJob[] = jobs
+    .map(serializeJob)
+    .filter((job): job is SerializedThumbnailJob => job !== null);
 
   let initialProject: SerializedCoverProject | null = null;
   const projectId = await searchParams?.projectId ?? null;

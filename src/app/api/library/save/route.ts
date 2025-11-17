@@ -103,7 +103,7 @@ export async function POST(request: Request) {
           selectedImageUrl: resultUrl,
           generatedImageUrls: allGeneratedUrls.length
             ? (allGeneratedUrls as Prisma.InputJsonValue)
-            : null,
+            : Prisma.JsonNull,
         },
       });
 

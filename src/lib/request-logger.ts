@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type RequestLogParams = {
@@ -34,7 +35,7 @@ export async function logRequest({
         responseTimeMs,
         falRequestId,
         inputImageCount,
-        requestPayloadSummary,
+        requestPayloadSummary: requestPayloadSummary as Prisma.InputJsonValue,
       },
     });
   } catch (error) {
