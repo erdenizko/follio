@@ -106,6 +106,8 @@ function buildInputsFromAssets(project: ProjectWithAssets): GenerationImageInput
         uploadUrl: url,
         mimeType: "image/png",
         sizeBytes: 0,
+        width: undefined,
+        height: undefined,
       }));
     }
   }
