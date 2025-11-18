@@ -56,12 +56,17 @@ export async function uploadToCloudinary(
   const signatureData = await getUploadSignature();
 
   // Create form data for Cloudinary upload
+  // Include all parameters that were signed on the server
   const formData = new FormData();
   formData.append('file', file);
   formData.append('signature', signatureData.signature);
   formData.append('timestamp', signatureData.timestamp.toString());
   formData.append('api_key', signatureData.apiKey);
   formData.append('folder', signatureData.folder);
+  formData.append('resource_type', 'image');
+  formData.append('use_filename', 'true');
+  formData.append('unique_filename', 'true');
+  formData.append('overwrite', 'false');
 
   // Upload directly to Cloudinary with progress tracking
   return new Promise((resolve, reject) => {

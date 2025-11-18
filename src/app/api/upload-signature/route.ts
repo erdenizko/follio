@@ -51,7 +51,10 @@ export async function POST(request: Request) {
     const folder = `${DEFAULT_FOLDER}/${session.user.id}`;
     const timestamp = Math.round(Date.now() / 1000);
     
-    // Parameters that will be signed
+    // Parameters that will be signed and sent in the client request
+    // Cloudinary requires ALL sent parameters (except file and api_key) to be in the signature
+    // These options match the server-side upload behavior for consistency
+    // Note: api_sign_request converts values to strings, but we use booleans here for clarity
     const uploadParams = {
       timestamp,
       folder,
