@@ -182,7 +182,6 @@ const ZIP_MIME_TYPES = ["application/zip", "application/x-zip-compressed", "appl
 const ZIP_MIME_TYPES_LOWER = ZIP_MIME_TYPES.map((type) => type.toLowerCase());
 const ZIP_FILE_EXTENSIONS = [".zip"];
 const FILE_INPUT_ACCEPT = [...ACCEPTED_IMAGE_TYPES, ...ZIP_MIME_TYPES, ...ZIP_FILE_EXTENSIONS].join(",");
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
 type AcceptedImageMimeType = (typeof ACCEPTED_IMAGE_TYPES)[number];
 const EXTENSION_TO_MIME: Record<string, AcceptedImageMimeType> = {
   png: "image/png",
@@ -365,7 +364,7 @@ export function GeneratorApp({
         return null;
       }
 
-      // Increased limit since we use direct uploads for large files
+      // Increased limit since we use direct uploads for all files
       const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50MB
       if (file.size > MAX_UPLOAD_SIZE) {
         toast({
@@ -376,80 +375,50 @@ export function GeneratorApp({
         return null;
       }
 
-      // For files larger than 2MB, upload directly to Cloudinary to bypass Vercel's 4.5MB limit
-      const DIRECT_UPLOAD_THRESHOLD = 2 * 1024 * 1024; // 2MB
-
-      if (file.size > DIRECT_UPLOAD_THRESHOLD) {
-        try {
-          toast({
-            title: "Uploading large file...",
-            description: `Uploading ${file.name} to cloud storage`,
-          });
-
-          // Upload directly to Cloudinary
-          const result = await uploadToCloudinary(file, (progress) => {
-            console.log(`Upload progress for ${file.name}: ${progress}%`);
-          });
-
-          // Create a small preview for UI (not sent to API)
-          const base64Preview = await readFileAsDataUrl(file);
-          const { width, height } = await readImageDimensions(base64Preview).catch(() => ({
-            width: result.width,
-            height: result.height,
-          }));
-
-          toast({
-            title: "Upload complete",
-            description: `${file.name} is ready for generation`,
-          });
-
-          return {
-            id: crypto.randomUUID(),
-            name: file.name,
-            uploadUrl: result.secure_url, // Use uploadUrl instead of base64
-            previewUrl: base64Preview, // Small preview for UI only
-            mimeType,
-            sizeBytes: result.bytes,
-            width: width ?? result.width,
-            height: height ?? result.height,
-          };
-        } catch (error) {
-          console.error("Upload to Cloudinary failed:", error);
-          toast({
-            title: "Upload failed",
-            description: error instanceof Error ? error.message : "Failed to upload to cloud storage",
-            variant: "destructive",
-          });
-          return null;
-        }
-      }
-
-      // For small files (<2MB), continue using base64 (faster, no extra request)
-      if (file.size > MAX_FILE_SIZE) {
+      // Always upload to Cloudinary to bypass Vercel's 4.5MB body size limit
+      // This ensures the API request payload stays small
+      try {
         toast({
-          title: "File too large",
-          description: `${file.name} exceeds the 10MB size limit.`,
+          title: "Uploading file...",
+          description: `Uploading ${file.name} to cloud storage`,
+        });
+
+        // Upload directly to Cloudinary
+        const result = await uploadToCloudinary(file, (progress) => {
+          console.log(`Upload progress for ${file.name}: ${progress}%`);
+        });
+
+        // Create a small preview for UI (not sent to API)
+        const base64Preview = await readFileAsDataUrl(file);
+        const { width, height } = await readImageDimensions(base64Preview).catch(() => ({
+          width: result.width,
+          height: result.height,
+        }));
+
+        toast({
+          title: "Upload complete",
+          description: `${file.name} is ready for generation`,
+        });
+
+        return {
+          id: crypto.randomUUID(),
+          name: file.name,
+          uploadUrl: result.secure_url, // Use uploadUrl instead of base64
+          previewUrl: base64Preview, // Small preview for UI only
+          mimeType,
+          sizeBytes: result.bytes,
+          width: width ?? result.width,
+          height: height ?? result.height,
+        };
+      } catch (error) {
+        console.error("Upload to Cloudinary failed:", error);
+        toast({
+          title: "Upload failed",
+          description: error instanceof Error ? error.message : "Failed to upload to cloud storage",
           variant: "destructive",
         });
         return null;
       }
-
-      const base64 = await readFileAsDataUrl(file);
-      const { width, height } = await readImageDimensions(base64).catch(() => ({
-        width: undefined,
-        height: undefined,
-      }));
-
-      return {
-        id: crypto.randomUUID(),
-        name: file.name,
-        base64,
-        previewUrl: base64,
-        mimeType,
-        sizeBytes: file.size,
-        width,
-        height,
-      };
     },
     [toast],
   );
@@ -569,23 +538,32 @@ export function GeneratorApp({
         return;
       }
 
+      // Strip base64 from payload to keep request body small (prevents 413 errors)
+      // All images should have uploadUrl from Cloudinary upload
       const payloadImages = images
         .map((image) => ({
           id: image.id,
           name: image.name,
-          base64: image.base64,
+          // Explicitly exclude base64 - only send uploadUrl
           uploadUrl: image.uploadUrl,
           mimeType: image.mimeType,
           sizeBytes: image.sizeBytes,
           width: image.width,
           height: image.height,
         }))
-        .filter((image) => image.base64 || image.uploadUrl);
+        .filter((image) => {
+          // Only include images that have uploadUrl (required for API)
+          if (!image.uploadUrl) {
+            console.warn(`Image ${image.name} missing uploadUrl, skipping from payload`);
+            return false;
+          }
+          return true;
+        });
 
       if (!payloadImages.length) {
         toast({
           title: "Images unavailable",
-          description: "We couldn't load the layers for this generation.",
+          description: "All images must be uploaded before generating. Please wait for uploads to complete.",
           variant: "destructive",
         });
         return;

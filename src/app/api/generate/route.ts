@@ -80,8 +80,33 @@ export async function POST(request: Request) {
     }
 
     userId = session.user.id;
-    console.log("rawBody", rawBody);
+    
+    // Log request size for monitoring (helps debug 413 errors)
+    const contentLength = request.headers.get("content-length");
+    if (contentLength) {
+      const sizeMB = Number.parseInt(contentLength, 10) / (1024 * 1024);
+      console.log(`[generate] Request body size: ${sizeMB.toFixed(2)}MB (${contentLength} bytes)`);
+    }
+
     const parsedPayload = createGenerationSchema.parse(rawBody);
+    
+    // Validate that all images have uploadUrl (required to prevent 413 errors)
+    // Images should be uploaded to Cloudinary client-side before this request
+    const imagesWithoutUploadUrl = parsedPayload.images.filter((img) => !img.uploadUrl);
+    if (imagesWithoutUploadUrl.length > 0) {
+      responseStatus = 400;
+      return NextResponse.json(
+        {
+          error: "ValidationError",
+          details: {
+            message: `All images must be uploaded before generation. ${imagesWithoutUploadUrl.length} image(s) are missing uploadUrl.`,
+            images: imagesWithoutUploadUrl.map((img) => ({ id: img.id, name: img.name })),
+          },
+        },
+        { status: responseStatus },
+      );
+    }
+
     const normalizedProjectName = parsedPayload.projectName.trim();
     const projectSlug = slugifyProjectName(normalizedProjectName);
     payload = {
@@ -90,6 +115,8 @@ export async function POST(request: Request) {
     };
     assertCustomDimensions(payload);
 
+    // Since all images already have uploadUrl, ensureImagesHaveCloudinaryUrls will just pass them through
+    // This is still called for consistency and to handle any edge cases
     uploadedImages = await ensureImagesHaveCloudinaryUrls(parsedPayload.images, {
       userId,
     });
