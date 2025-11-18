@@ -17,6 +17,8 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { uploadToCloudinary } from "@/lib/client-cloudinary";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -363,6 +365,66 @@ export function GeneratorApp({
         return null;
       }
 
+      // Increased limit since we use direct uploads for large files
+      const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50MB
+      if (file.size > MAX_UPLOAD_SIZE) {
+        toast({
+          title: "File too large",
+          description: `${file.name} exceeds the 50MB size limit.`,
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      // For files larger than 2MB, upload directly to Cloudinary to bypass Vercel's 4.5MB limit
+      const DIRECT_UPLOAD_THRESHOLD = 2 * 1024 * 1024; // 2MB
+
+      if (file.size > DIRECT_UPLOAD_THRESHOLD) {
+        try {
+          toast({
+            title: "Uploading large file...",
+            description: `Uploading ${file.name} to cloud storage`,
+          });
+
+          // Upload directly to Cloudinary
+          const result = await uploadToCloudinary(file, (progress) => {
+            console.log(`Upload progress for ${file.name}: ${progress}%`);
+          });
+
+          // Create a small preview for UI (not sent to API)
+          const base64Preview = await readFileAsDataUrl(file);
+          const { width, height } = await readImageDimensions(base64Preview).catch(() => ({
+            width: result.width,
+            height: result.height,
+          }));
+
+          toast({
+            title: "Upload complete",
+            description: `${file.name} is ready for generation`,
+          });
+
+          return {
+            id: crypto.randomUUID(),
+            name: file.name,
+            uploadUrl: result.secure_url, // Use uploadUrl instead of base64
+            previewUrl: base64Preview, // Small preview for UI only
+            mimeType,
+            sizeBytes: result.bytes,
+            width: width ?? result.width,
+            height: height ?? result.height,
+          };
+        } catch (error) {
+          console.error("Upload to Cloudinary failed:", error);
+          toast({
+            title: "Upload failed",
+            description: error instanceof Error ? error.message : "Failed to upload to cloud storage",
+            variant: "destructive",
+          });
+          return null;
+        }
+      }
+
+      // For small files (<2MB), continue using base64 (faster, no extra request)
       if (file.size > MAX_FILE_SIZE) {
         toast({
           title: "File too large",
