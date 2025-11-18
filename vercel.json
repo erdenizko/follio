@@ -1,16 +1,17 @@
 {
   "functions": {
     "src/app/api/generate/route.ts": {
-      "maxDuration": 300
+      "maxDuration": 300,
+      "memory": 3008
     },
     "src/app/api/gallery/upload/route.ts": {
-      "maxDuration": 300
+      "maxDuration": 300,
+      "memory": 3008
     },
     "src/app/api/library/batch-upload/route.ts": {
       "maxDuration": 300,
       "memory": 3008
     }
-  },
-  "maxRequestBodySize": "200mb"
+  }
 }
 

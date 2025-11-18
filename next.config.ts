@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // Increase body size limit for API routes to handle large uploads
+    serverActions: {
+      bodySizeLimit: '200mb',
+    },
+  },
 };
 
 export default nextConfig;

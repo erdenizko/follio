@@ -14,6 +14,7 @@ import type { GenerationImageInput } from "@/lib/validation/generate";
 // Configure route to accept larger payloads (200MB configured in vercel.json)
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes for large zip uploads
+export const dynamic = 'force-dynamic';
 
 const ZIP_MIME_TYPES = [
   "application/zip",

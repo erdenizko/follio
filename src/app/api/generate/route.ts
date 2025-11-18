@@ -28,9 +28,10 @@ import {
 } from "@/lib/validation/generate";
 import { slugifyProjectName } from "@/lib/utils";
 
-// Configure route to accept larger payloads (10MB)
+// Configure route to accept larger payloads
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes for generation
+export const dynamic = 'force-dynamic';
 
 const MODEL_ID = process.env.FAL_WORKFLOW_PATH ?? "workflows/erdenizkorkmaz1/cover-generator";
 
