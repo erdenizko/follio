@@ -25,7 +25,7 @@ export function AppPageLayout({
         backgroundSize: "18px 18px",
       }}
     >
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 md:gap-10 px-6 py-10 lg:py-16">
+      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 md:gap-10 p-4 lg:p-6">
         <AppHeader label={label} user={user} actions={actions} />
         {children}
       </div>

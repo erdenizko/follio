@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   ArrowUpRight,
   BookOpen,
@@ -11,6 +11,8 @@ import {
   GalleryThumbnails,
   LibraryIcon,
   ImageIcon,
+  Menu,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -89,6 +91,7 @@ const NAV_ITEMS = [
 
 export function AppHeader({ label, user, actions }: AppHeaderProps) {
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -147,9 +150,11 @@ export function AppHeader({ label, user, actions }: AppHeaderProps) {
     <header className="flex flex-col gap-8">
       <div className="flex flex-row items-center justify-between gap-4">
         <Link href="/">
-          <Image src="/follio_logo.svg" alt="Follio" width={100} height={100} className="h-20 w-auto" />
+          <Image src="/follio_logo.svg" alt="Follio" width={100} height={100} className="h-16 w-auto md:h-20" />
         </Link>
-        <nav>
+
+        {/* Desktop Navigation - Hidden on mobile */}
+        <nav className="hidden md:block">
           <ul className="flex flex-row items-center gap-8">
             {NAV_ITEMS.map((item) => (
               <li className="group" key={item.id}>
@@ -169,7 +174,8 @@ export function AppHeader({ label, user, actions }: AppHeaderProps) {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-3">
+        {/* Desktop User Menu - Hidden on mobile */}
+        <div className="hidden md:flex items-center gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger>
               <h1 className="text-xl font-semibold tracking-tight text-white">
@@ -184,10 +190,77 @@ export function AppHeader({ label, user, actions }: AppHeaderProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden text-white p-2"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
+        </button>
       </div>
 
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden flex flex-col gap-6 pb-4">
+          {/* Mobile Navigation */}
+          <nav>
+            <ul className="flex flex-col gap-4">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span
+                      className={cn(
+                        "text-lg flex flex-row items-center gap-2 transition-colors duration-300",
+                        label === item.activeLabel ? "text-white" : "text-white/50",
+                      )}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Mobile Actions */}
+          {actionList.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {actionList.map(renderAction)}
+            </div>
+          )}
+
+          {/* Mobile User Section */}
+          <div className="pt-4 border-t border-white/10">
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-white/70">
+                {user.name ?? user.email}
+              </p>
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="justify-start gap-2 border-white/20 bg-white/5 text-slate-100 hover:bg-white/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Actions - Hidden on mobile */}
       {actionList.length ? (
-        <div className="flex flex-row flex-wrap items-center justify-end gap-3">
+        <div className="hidden md:flex flex-row flex-wrap items-center justify-end gap-3">
           {actionList.map(renderAction)}
         </div>
       ) : null}
