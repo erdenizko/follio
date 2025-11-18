@@ -14,13 +14,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    // Increase the body size limit for API routes
-    // 200MB for batch uploads (zip files), 10MB for regular image uploads
-    serverActions: {
-      bodySizeLimit: '200mb',
-    },
-  },
 };
 
 export default nextConfig;

@@ -377,7 +377,27 @@ export function LibraryProjectsSection({
                                                 sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
                                             />
                                         ) : (
-                                            <div className="grid grid-cols-2 gap-2">
+                                            <div className="w-full h-full flex items-center justify-center text-white/60">
+                                                No Cover Yet
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex flex-1 flex-row items-center justify-between gap-2 md:gap-3 min-w-0">
+                                        <div className="flex flex-col ">
+                                            <div className="flex flex-row items-center gap-2">
+                                                <h3 className="text-base md:text-lg lg:text-xl font-semibold text-white truncate">{project.name}</h3>
+                                                {!hasPreview && (
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/60 w-fit my-2">No Cover Yet</span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs md:text-sm text-white/60">
+                                                {project.latestVersionNumber} version
+                                                {project.latestVersionNumber === 1 ? "" : "s"} · Updated{" "}
+                                                {new Date(project.updatedAt).toLocaleDateString()}
+                                            </p>
+
+                                            <div className="grid grid-cols-3 gap-2">
                                                 <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
                                                     <NextImage
                                                         src={project.latestVersion!.sourceImage1Url ?? ""}
@@ -407,22 +427,6 @@ export function LibraryProjectsSection({
                                                     </div>
                                                 ) : null}
                                             </div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex flex-1 flex-row items-center justify-between gap-2 md:gap-3 min-w-0">
-                                        <div className="flex flex-col ">
-                                            <div className="flex flex-row items-center gap-2">
-                                                <h3 className="text-base md:text-lg lg:text-xl font-semibold text-white truncate">{project.name}</h3>
-                                                {!hasPreview && (
-                                                    <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/60 w-fit my-2">No Cover Yet</span>
-                                                )}
-                                            </div>
-                                            <p className="text-xs md:text-sm text-white/60">
-                                                {project.latestVersionNumber} version
-                                                {project.latestVersionNumber === 1 ? "" : "s"} · Updated{" "}
-                                                {new Date(project.updatedAt).toLocaleDateString()}
-                                            </p>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-2">
                                             {project.libraryGenerationStatus === "COMPLETED" ? (
