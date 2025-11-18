@@ -3,9 +3,13 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { UploadCloud, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import JSZip from "jszip";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { uploadToCloudinary } from "@/lib/client-cloudinary";
+import { slugifyProjectName } from "@/lib/utils";
+import type { GenerationImageInput } from "@/lib/validation/generate";
 
 type LibraryBatchUploadFormProps = {
     onCompleted?: () => void;
@@ -42,6 +46,126 @@ function isZipFile(file: File) {
 
     const lowerName = file.name.toLowerCase();
     return ZIP_EXTENSIONS.some((extension) => lowerName.endsWith(extension));
+}
+
+const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
+const EXTENSION_TO_MIME: Record<string, (typeof ACCEPTED_IMAGE_TYPES)[number]> = {
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    webp: "image/webp",
+};
+
+const MAX_IMAGES_PER_PROJECT = 3;
+
+function getFileExtension(fileName?: string | null) {
+    if (!fileName) {
+        return null;
+    }
+    const normalized = fileName.toLowerCase();
+    const lastDotIndex = normalized.lastIndexOf(".");
+    if (lastDotIndex === -1 || lastDotIndex === normalized.length - 1) {
+        return null;
+    }
+    return normalized.slice(lastDotIndex + 1);
+}
+
+function sanitizeFileName(entryName: string) {
+    return entryName.split(/[/\\]/).filter(Boolean).join("-");
+}
+
+function resolveProjectSegment(segments: string[]) {
+    if (!segments.length) {
+        return null;
+    }
+
+    if (segments[0]?.toLowerCase() === "root") {
+        return segments[1] ?? null;
+    }
+
+    return segments[0];
+}
+
+type ProjectGroup = {
+    slug: string;
+    name: string;
+    inputs: GenerationImageInput[];
+};
+
+async function extractArchiveProjects(file: File): Promise<Map<string, ProjectGroup>> {
+    const archive = await JSZip.loadAsync(file);
+    const groups = new Map<string, ProjectGroup>();
+
+    const entries = Object.values(archive.files);
+    for (const entry of entries) {
+        if (entry.dir) continue;
+        if (entry.name.toLowerCase().startsWith("__macosx/")) continue;
+
+        const normalizedPath = entry.name.replace(/\\+/g, "/");
+        const segments = normalizedPath.split("/").filter(Boolean);
+        const projectSegment = resolveProjectSegment(segments);
+        if (!projectSegment) continue;
+
+        const projectName = projectSegment.trim();
+        if (!projectName) continue;
+
+        const slug = slugifyProjectName(projectName);
+        if (!slug) continue;
+
+        const fileSegments =
+            segments[0]?.toLowerCase() === "root" ? segments.slice(2) : segments.slice(1);
+        if (!fileSegments.length) continue;
+
+        const relativeName = fileSegments.join("/");
+        if (!relativeName || relativeName.startsWith("._")) continue;
+
+        const extension = getFileExtension(relativeName);
+        if (!extension) continue;
+
+        const mimeType = EXTENSION_TO_MIME[extension];
+        if (!mimeType) continue;
+        if (!ACCEPTED_IMAGE_TYPES.includes(mimeType)) continue;
+
+        const blob = await entry.async("blob");
+        if (!blob.size) continue;
+
+        // Create a File object from the blob for Cloudinary upload
+        const imageFile = new File([blob], sanitizeFileName(relativeName), {
+            type: mimeType,
+            lastModified: Date.now(),
+        });
+
+        const existing = groups.get(slug);
+        if (existing) {
+            if (existing.inputs.length >= MAX_IMAGES_PER_PROJECT) {
+                continue;
+            }
+            existing.inputs.push({
+                id: crypto.randomUUID(),
+                name: sanitizeFileName(relativeName),
+                mimeType,
+                sizeBytes: blob.size,
+                file: imageFile, // Store file for later upload
+            } as GenerationImageInput & { file: File });
+            continue;
+        }
+
+        groups.set(slug, {
+            slug,
+            name: projectName,
+            inputs: [
+                {
+                    id: crypto.randomUUID(),
+                    name: sanitizeFileName(relativeName),
+                    mimeType,
+                    sizeBytes: blob.size,
+                    file: imageFile, // Store file for later upload
+                } as GenerationImageInput & { file: File },
+            ],
+        });
+    }
+
+    return groups;
 }
 
 export function LibraryBatchUploadForm({
@@ -112,15 +236,89 @@ export function LibraryBatchUploadForm({
             return;
         }
 
-        const formData = new FormData();
-        formData.append("file", file, file.name);
-
         setIsUploading(true);
         try {
+            // Step 1: Extract ZIP and organize by projects
+            toast({
+                title: "Extracting archive...",
+                description: "Reading ZIP file structure",
+            });
+
+            const projectGroups = await extractArchiveProjects(file);
+            const totalImages = Array.from(projectGroups.values()).reduce(
+                (acc, group) => acc + group.inputs.length,
+                0,
+            );
+
+            if (totalImages === 0) {
+                throw new Error("No supported images were found under project folders.");
+            }
+
+            if (totalImages > 60) {
+                throw new Error("Upload up to 60 images per archive.");
+            }
+
+            // Step 2: Upload all images to Cloudinary
+            toast({
+                title: "Uploading images...",
+                description: `Uploading ${totalImages} image${totalImages === 1 ? "" : "s"} to cloud storage`,
+            });
+
+            const projectsWithUploads: Array<{
+                slug: string;
+                name: string;
+                inputs: GenerationImageInput[];
+            }> = [];
+
+            for (const group of projectGroups.values()) {
+                const uploadedInputs: GenerationImageInput[] = [];
+
+                for (const input of group.inputs) {
+                    const file = (input as GenerationImageInput & { file: File }).file;
+                    if (!file) continue;
+
+                    try {
+                        const result = await uploadToCloudinary(file);
+                        uploadedInputs.push({
+                            id: input.id,
+                            name: input.name,
+                            uploadUrl: result.secure_url,
+                            mimeType: input.mimeType,
+                            sizeBytes: result.bytes,
+                            width: result.width,
+                            height: result.height,
+                        });
+                    } catch (error) {
+                        console.error(`Failed to upload ${input.name}:`, error);
+                        throw new Error(`Failed to upload ${input.name}: ${error instanceof Error ? error.message : "Unknown error"}`);
+                    }
+                }
+
+                if (uploadedInputs.length > 0) {
+                    projectsWithUploads.push({
+                        slug: group.slug,
+                        name: group.name,
+                        inputs: uploadedInputs,
+                    });
+                }
+            }
+
+            // Step 3: Send metadata to API
+            toast({
+                title: "Processing...",
+                description: "Creating projects and versions",
+            });
+
             const response = await fetch("/api/library/batch-upload", {
                 method: "POST",
-                body: formData,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    projects: projectsWithUploads,
+                }),
             });
+
             const payload = await response.json().catch(() => null);
 
             if (!response.ok) {
