@@ -296,7 +296,7 @@ export function LibraryProjectsSection({
         <section className="flex flex-col gap-4 md:gap-6">
             {selectedCount > 0 ? (
                 <div className="flex flex-col gap-3 md:gap-4">
-                    <div className="flex flex-row items-center justify-between gap-3 rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/40 px-6 md:px-6 py-3 md:py-4">
+                    <div className="flex flex-row items-center justify-between gap-3 rounded-md border border-white/10 bg-black/20 px-2 lg:px-6 py-2 lg:py-4">
                         <div>
                             <p className="text-xs md:text-sm text-white/70">
                                 {selectedCount} project{selectedCount === 1 ? "" : "s"} selected
@@ -321,8 +321,8 @@ export function LibraryProjectsSection({
                                 ) : (
                                     <span className="flex items-center gap-2">
                                         <PlayCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                                        <span className="hidden sm:inline">Create cover images for selection</span>
-                                        <span className="sm:hidden">Create covers</span>
+                                        <span className="hidden md:inline">Create cover images for selection</span>
+                                        <span className="md:hidden">Create covers</span>
                                     </span>
                                 )}
                             </Button>
@@ -342,7 +342,8 @@ export function LibraryProjectsSection({
                                 ) : (
                                     <span className="flex items-center gap-2">
                                         <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                                        Download all covers
+                                        <span className="hidden md:inline">Download all covers</span>
+                                        <span className="md:hidden">Download</span>
                                     </span>
                                 )}
                             </Button>
@@ -358,7 +359,7 @@ export function LibraryProjectsSection({
                     return (
                         <article
                             key={project.id}
-                            className="flex flex-col gap-3 md:gap-4 rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/60 p-3 md:p-4"
+                            className="flex flex-col gap-3 md:gap-4 rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/60 p-2 md:p-4"
                         >
                             <div className="flex items-center gap-3 md:gap-4">
                                 <Checkbox
@@ -366,8 +367,8 @@ export function LibraryProjectsSection({
                                     onCheckedChange={() => toggleSelection(project.id)}
                                     className="size-6 md:size-8 rounded-full border border-white/10 bg-white/5 text-white flex-shrink-0 mt-1"
                                 />
-                                <div className="flex flex-row gap-3 md:gap-4 flex-1 min-w-0">
-                                    <div className={cn("relative overflow-hidden rounded-xl md:rounded-2xl border border-white/10 bg-white/5 sm:w-24 md:w-52 flex-shrink-0 min-w-24 min-h-24 aspect-square md:aspect-[4/3]")}>
+                                <div className="flex flex-row items-center gap-3 md:gap-4 flex-1 min-w-0">
+                                    <div className={cn("relative overflow-hidden rounded-xl md:rounded-2xl border border-white/10 bg-white/5 w-20 h-20 md:w-52 md:h-24 aspect-square md:aspect-[4/3]")}>
                                         {hasPreview ? (
                                             <NextImage
                                                 src={project.latestVersion!.selectedImageUrl ?? ""}
@@ -377,35 +378,37 @@ export function LibraryProjectsSection({
                                                 sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-white/60">
+                                            <div className="absolute w-full h-full text-[10px] md:text-xs flex items-center justify-center text-white/60 ">
                                                 No Cover Yet
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="flex flex-1 flex-row items-center justify-between gap-2 md:gap-3 min-w-0">
-                                        <div className="flex flex-col ">
+                                        <div className="flex flex-col gap-0.5">
                                             <div className="flex flex-row items-center gap-2">
-                                                <h3 className="text-base md:text-lg lg:text-xl font-semibold text-white truncate">{project.name}</h3>
+                                                <h3 className="text-xs md:text-lg lg:text-xl font-semibold text-white truncate">{project.name}</h3>
                                                 {!hasPreview && (
-                                                    <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/60 w-fit my-2">No Cover Yet</span>
+                                                    <span className="text-[10px] whitespace-nowrap md:text-xs px-2 py-0.5 md:py-1 rounded-full bg-white/10 text-white/60 w-fit my-2">No Cover Yet</span>
                                                 )}
                                             </div>
-                                            <p className="text-xs md:text-sm text-white/60">
+                                            <p className="text-[10px] tracking-tighter md:text-sm text-white/60 -mt-1">
                                                 {project.latestVersionNumber} version
                                                 {project.latestVersionNumber === 1 ? "" : "s"} · Updated{" "}
                                                 {new Date(project.updatedAt).toLocaleDateString()}
                                             </p>
 
-                                            <div className="grid grid-cols-3 gap-2">
-                                                <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
-                                                    <NextImage
-                                                        src={project.latestVersion!.sourceImage1Url ?? ""}
-                                                        alt={project.name}
-                                                        fill
-                                                        sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
-                                                    />
-                                                </div>
+                                            <div className="grid grid-cols-3 gap-2 mt-2 md:mt-4">
+                                                {project.latestVersion!.sourceImage1Url ? (
+                                                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
+                                                        <NextImage
+                                                            src={project.latestVersion!.sourceImage1Url ?? ""}
+                                                            alt={project.name}
+                                                            fill
+                                                            sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
+                                                        />
+                                                    </div>
+                                                ) : null}
                                                 {project.latestVersion!.sourceImage2Url ? (
                                                     <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
                                                         <NextImage

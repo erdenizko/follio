@@ -64,13 +64,11 @@ export default async function LibraryPage() {
 
   return (
     <AppPageLayout label="Library" user={user}>
-      <div className="flex flex-row flex-wrap items-center justify-between gap-3 rounded-[32px] border border-white/10 bg-black/20 px-6 py-4">
-        <div className="w-64 md:w-full md:max-w-2xl">
-          <p className="text-xs md:text-sm text-white/70">
-            Import a ZIP structured as <code>root/&lt;project-name&gt;/&lt;images&gt;</code> to
-            batch create versions in your library.
-          </p>
-        </div>
+      <div className="flex flex-row items-center justify-between gap-3 rounded-md border border-white/10 bg-black/20 px-2 lg:px-6 py-2 lg:py-4">
+        <p className="lg:max-w-lg text-[10px] md:text-sm text-white/70">
+          Import a ZIP structured as <code>root/&lt;project-name&gt;/&lt;images&gt;</code> to
+          batch create versions in your library.
+        </p>
         <LibraryBatchUploadDialog label="Batch upload" />
       </div>
       {serializedProjects.length ? (
