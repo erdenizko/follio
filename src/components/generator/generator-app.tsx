@@ -865,46 +865,46 @@ export function GeneratorApp({
   }, [handleCloseGalleryDialog, isGalleryDialogOpen]);
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-6 md:gap-10">
       <Form {...form}>
         <form
-          className="relative flex flex-col gap-8"
+          className="relative flex flex-col gap-4 md:gap-8"
           onSubmit={form.handleSubmit((values) => void handleGenerate(values))}
         >
-          <div className="w-full flex flex-row gap-8">
-            <FormField
-              control={form.control}
-              name="projectName"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel className="text-xs uppercase tracking-[0.4em] text-white/60">
-                    Name
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      placeholder="Merry Christmas"
-                      className="w-full rounded-[24px] border border-white/15 bg-black/30 p-6 text-base text-white placeholder:text-white/30"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="w-full grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_auto_minmax(0,1.8fr)] lg:items-center ">
-            <div className="rounded-[32px] border border-white/15 bg-black/30 p-6 backdrop-blur z-10">
+          <div className="w-full grid gap-6 lg:gap-12 lg:grid-cols-[minmax(0,1.4fr)_auto_minmax(0,1.8fr)] lg:items-center ">
+            <div className="rounded-[20px] md:rounded-[32px] border border-white/15 bg-black/30 p-4 md:p-6 backdrop-blur z-10">
+              <div className="w-full flex flex-row gap-4 md:gap-8">
+                <FormField
+                  control={form.control}
+                  name="projectName"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel className="text-xs uppercase text-white/60">
+                        Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="text"
+                          placeholder="Merry Christmas"
+                          className="w-full border border-white/15 bg-black/30 p-4 md:p-6 text-base text-white placeholder:text-white/30"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <div className="relative">
                 <label
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={handleDrop}
                   htmlFor="file-upload"
-                  className="flex aspect-[3/4] cursor-pointer flex-col items-center justify-center rounded-[28px] bg-black/40 text-center transition hover:border-white/60"
+                  className="flex w-full min-h-96 cursor-pointer flex-col items-center justify-center rounded-[20px] md:rounded-[28px] bg-black/40 text-center transition hover:border-white/60"
                 >
-                  <UploadCloud className="h-12 w-12 text-white" />
-                  <p className="mt-4 text-sm uppercase tracking-[0.4em] text-white/60">Drop art</p>
-                  <p className="text-xs text-white/40">PNG · JPG · WEBP · ZIP · 10MB ea</p>
+                  <UploadCloud className="h-10 w-10 md:h-12 md:w-12 text-white" />
+                  <p className="mt-3 md:mt-4 text-xs md:text-sm uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/60">Drop art</p>
+                  <p className="text-[10px] md:text-xs text-white/40 px-2">PNG · JPG · WEBP · ZIP · 10MB ea</p>
                   <input
                     id="file-upload"
                     type="file"
@@ -915,33 +915,30 @@ export function GeneratorApp({
                   />
                 </label>
               </div>
-              <div className="mt-4 flex justify-end">
+              <div className="mt-3 md:mt-4 flex justify-end">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="text-white/80 hover:text-white"
+                  className="text-xs md:text-sm text-white/80 hover:text-white"
                   onClick={handleOpenGalleryDialog}
                 >
                   Select from gallery
                 </Button>
               </div>
               {images.length ? (
-                <div className="mt-4 flex flex-col items-end gap-2">
-                  <Button type="button" variant="ghost" size="sm" onClick={handleReset}>
-                    Clear uploads
-                  </Button>
-                  <div className="grid grid-cols-3 gap-3 w-full">
+                <div className="mt-3 md:mt-4 flex flex-col items-end gap-2">
+                  <div className="grid grid-cols-3 gap-2 md:gap-3 w-full">
                     {images.map((image) => (
                       <div
                         key={image.id}
-                        className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10"
+                        className="group relative aspect-square overflow-hidden rounded-xl md:rounded-2xl border border-white/10"
                       >
                         <NextImage src={image.previewUrl} alt={image.name} fill className="object-cover" />
                         <button
                           type="button"
                           onClick={() => deleteImage(image.id)}
-                          className="absolute right-2 top-2 rounded-full bg-black/70 p-1 text-white opacity-0 transition group-hover:opacity-100"
+                          className="absolute right-1.5 top-1.5 md:right-2 md:top-2 rounded-full bg-black/70 p-1 md:p-1.5 text-white opacity-100 md:opacity-0 transition md:group-hover:opacity-100"
                           aria-label={`Remove ${image.name}`}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -949,21 +946,24 @@ export function GeneratorApp({
                       </div>
                     ))}
                   </div>
+                  <Button type="button" variant="ghost" size="sm" className="text-xs md:text-sm" onClick={handleReset}>
+                    Clear uploads
+                  </Button>
                 </div>
               ) : null}
 
-              <div className="grid gap-4 mt-4">
+              <div className="grid gap-3 md:gap-4 mt-3 md:mt-4">
                 <FormField
                   control={form.control}
                   name="aspectRatioId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs uppercase tracking-[0.4em] text-white/60">
+                      <FormLabel className="text-xs uppercase text-white/60">
                         Ratio
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-12 rounded-2xl border-white/20 bg-black/60 text-slate-100">
+                          <SelectTrigger className="h-11 md:h-12 rounded-xl md:rounded-2xl border-white/20 bg-black/60 text-slate-100">
                             <SelectValue placeholder="Preset" />
                           </SelectTrigger>
                         </FormControl>
@@ -982,13 +982,13 @@ export function GeneratorApp({
                 />
 
                 {isCustomAspectRatio ? (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 md:gap-3">
                     <FormField
                       control={form.control}
                       name="customWidth"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+                          <FormLabel className="text-[10px] md:text-[11px] uppercase text-white/50">
                             Width
                           </FormLabel>
                           <FormControl>
@@ -997,7 +997,7 @@ export function GeneratorApp({
                               placeholder="1080"
                               value={field.value ?? ""}
                               onChange={field.onChange}
-                              className="h-12 rounded-2xl border-white/20 bg-black/60 text-slate-100 placeholder:text-white/30"
+                              className="h-11 md:h-12 rounded-xl md:rounded-2xl border-white/20 bg-black/60 text-slate-100 placeholder:text-white/30"
                             />
                           </FormControl>
                           <FormMessage />
@@ -1009,7 +1009,7 @@ export function GeneratorApp({
                       name="customHeight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+                          <FormLabel className="text-[10px] md:text-[11px] uppercase text-white/50">
                             Height
                           </FormLabel>
                           <FormControl>
@@ -1018,7 +1018,7 @@ export function GeneratorApp({
                               placeholder="1920"
                               value={field.value ?? ""}
                               onChange={field.onChange}
-                              className="h-12 rounded-2xl border-white/20 bg-black/60 text-slate-100 placeholder:text-white/30"
+                              className="h-11 md:h-12 rounded-xl md:rounded-2xl border-white/20 bg-black/60 text-slate-100 placeholder:text-white/30"
                             />
                           </FormControl>
                           <FormMessage />
@@ -1030,26 +1030,26 @@ export function GeneratorApp({
               </div>
             </div>
 
-            <hr className="border-white/15 border-2 border-dotted absolute top-1/2 -translate-y-1/2 w-full" />
+            <hr className="border-white/15 border-2 border-dotted absolute top-1/2 -translate-y-1/2 w-full hidden lg:block" />
 
-            <div className="flex items-center justify-center -mt-28">
+            <div className="flex items-center justify-center lg:-mt-2 mb-4 lg:mb-0">
               <Button
                 type="submit"
-                className="flex w-20 h-20 items-center justify-center rounded-full bg-white text-black shadow-2xl transition hover:scale-105 disabled:opacity-60"
+                className="flex w-full md:w-20 md:h-20 items-center justify-center rounded-full bg-white text-black shadow-2xl transition hover:scale-105 disabled:opacity-60"
                 disabled={isGenerating}
               >
+                <span className="block md:sr-only">Create cover</span>
                 {isGenerating ? (
-                  <Loader2 className="!size-8 animate-spin" />
+                  <Loader2 className="!size-6 md:!size-8 animate-spin" />
                 ) : (
-                  <Play className="!size-8" />
+                  <Play className="!size-6 md:!size-8" />
                 )}
-                <span className="sr-only">Create cover</span>
               </Button>
             </div>
 
-            <div className="flex w-full h-full flex-col gap-6 rounded-[32px] border border-white/15 bg-black/30 p-6 backdrop-blur">
+            <div className="flex w-full h-full flex-col gap-4 md:gap-6 rounded-[20px] md:rounded-[32px] border border-white/15 bg-black/30 p-4 md:p-6 backdrop-blur">
               {generationError ? (
-                <p className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                <p className="rounded-xl md:rounded-2xl border border-red-500/30 bg-red-500/10 px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-red-200">
                   {generationError}
                 </p>
               ) : null}
@@ -1076,16 +1076,16 @@ export function GeneratorApp({
         onSelectVersion={handleSelectVersionFromHistory}
       />
       {isGalleryDialogOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-10 backdrop-blur">
-          <div className="relative flex w-full max-w-5xl flex-col rounded-[32px] border border-white/15 bg-black/90 p-6 text-white shadow-2xl">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-3 md:px-4 py-6 md:py-10 backdrop-blur">
+          <div className="relative flex w-full max-w-5xl flex-col rounded-[20px] md:rounded-[32px] border border-white/15 bg-black/90 p-4 md:p-6 text-white shadow-2xl max-h-[95vh] overflow-hidden">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-lg font-semibold text-white">Gallery</p>
-                <p className="text-sm text-white/60">
+                <p className="text-base md:text-lg font-semibold text-white">Gallery</p>
+                <p className="text-xs md:text-sm text-white/60">
                   {isGalleryLoading
                     ? "Loading your uploads…"
                     : galleryError
-                      ? "We couldn’t load your uploads."
+                      ? "We couldn't load your uploads."
                       : galleryImages.length
                         ? `${galleryImages.length} file${galleryImages.length === 1 ? "" : "s"
                         } available`
@@ -1095,24 +1095,26 @@ export function GeneratorApp({
               <Button
                 type="button"
                 variant="ghost"
-                className="self-start text-white/70 hover:text-white sm:self-auto"
+                size="sm"
+                className="self-start text-xs md:text-sm text-white/70 hover:text-white sm:self-auto"
                 onClick={handleCloseGalleryDialog}
               >
                 Close
               </Button>
             </div>
-            <div className="mt-6 max-h-[60vh] overflow-hidden rounded-[28px] border border-white/10 bg-black/40">
+            <div className="mt-4 md:mt-6 max-h-[60vh] overflow-hidden rounded-[16px] md:rounded-[28px] border border-white/10 bg-black/40">
               {isGalleryLoading ? (
-                <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 text-white/70">
+                <div className="flex min-h-[200px] md:min-h-[240px] flex-col items-center justify-center gap-3 text-white/70">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <p>Loading gallery…</p>
+                  <p className="text-sm">Loading gallery…</p>
                 </div>
               ) : galleryError ? (
-                <div className="flex min-h-[240px] flex-col items-center justify-center gap-4 px-6 text-center">
-                  <p className="text-sm text-red-200">{galleryError}</p>
+                <div className="flex min-h-[200px] md:min-h-[240px] flex-col items-center justify-center gap-4 px-4 md:px-6 text-center">
+                  <p className="text-xs md:text-sm text-red-200">{galleryError}</p>
                   <Button
                     type="button"
                     variant="outline"
+                    size="sm"
                     className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10"
                     onClick={handleRetryGalleryFetch}
                   >
@@ -1120,9 +1122,9 @@ export function GeneratorApp({
                   </Button>
                 </div>
               ) : galleryImages.length === 0 ? (
-                <div className="flex min-h-[240px] flex-col items-center justify-center gap-2 px-6 text-center text-white/70">
-                  <p className="text-base text-white">No uploads yet</p>
-                  <p className="text-sm">
+                <div className="flex min-h-[200px] md:min-h-[240px] flex-col items-center justify-center gap-2 px-4 md:px-6 text-center text-white/70">
+                  <p className="text-sm md:text-base text-white">No uploads yet</p>
+                  <p className="text-xs md:text-sm">
                     Upload artwork or generate covers to see them here.
                   </p>
                 </div>
@@ -1138,13 +1140,13 @@ export function GeneratorApp({
                           key={image.id}
                           disabled={isDisabled}
                           onClick={() => toggleGallerySelection(image.id)}
-                          className={`flex w-full items-center gap-4 p-4 text-left transition ${isDisabled
+                          className={`flex w-full items-center gap-3 md:gap-4 p-3 md:p-4 text-left transition ${isDisabled
                             ? "cursor-not-allowed opacity-50"
                             : "hover:bg-white/5"
                             }`}
                         >
                           <span
-                            className={`flex h-5 w-5 items-center justify-center rounded border ${isSelected ? "border-white bg-white" : "border-white/40"
+                            className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border ${isSelected ? "border-white bg-white" : "border-white/40"
                               }`}
                             aria-hidden
                           >
@@ -1152,7 +1154,7 @@ export function GeneratorApp({
                               <span className="h-2 w-2 rounded-sm bg-black" />
                             ) : null}
                           </span>
-                          <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-white/10 bg-black/50">
+                          <div className="relative h-16 w-16 md:h-20 md:w-20 flex-shrink-0 overflow-hidden rounded-xl md:rounded-2xl border border-white/10 bg-black/50">
                             <NextImage
                               src={image.uploadUrl}
                               alt={image.projectName ?? "Gallery image"}
@@ -1161,22 +1163,22 @@ export function GeneratorApp({
                               sizes="80px"
                             />
                           </div>
-                          <div className="flex flex-1 flex-col gap-1">
-                            <p className="text-sm font-semibold text-white">
+                          <div className="flex flex-1 flex-col gap-0.5 md:gap-1 min-w-0">
+                            <p className="text-xs md:text-sm font-semibold text-white truncate">
                               {image.projectName ?? "Untitled project"}
                             </p>
-                            <p className="text-xs text-white/60">
+                            <p className="text-[10px] md:text-xs text-white/60 truncate">
                               {formatGalleryDate(image.createdAt)}
                             </p>
-                            <p className="text-xs text-white/70">
+                            <p className="text-[10px] md:text-xs text-white/70 truncate">
                               {formatGalleryDimensions(image.width, image.height)} ·{" "}
-                              {formatGalleryFileSize(image.sizeBytes)} · {image.mimeType}
+                              {formatGalleryFileSize(image.sizeBytes)}
                             </p>
                           </div>
-                          <div className="text-right text-xs text-white/60">
-                            {image.aspectRatioString ?? "—"}
+                          <div className="text-right text-[10px] md:text-xs text-white/60 flex-shrink-0">
+                            <div className="truncate max-w-[60px] md:max-w-none">{image.aspectRatioString ?? "—"}</div>
                             {isDisabled ? (
-                              <p className="text-[11px] uppercase tracking-[0.3em] text-white/40">
+                              <p className="text-[9px] md:text-[11px] uppercase tracking-[0.3em] text-white/40">
                                 Added
                               </p>
                             ) : null}
@@ -1188,24 +1190,26 @@ export function GeneratorApp({
                 </div>
               )}
             </div>
-            <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-white/70">
+            <div className="mt-4 md:mt-6 flex flex-col gap-3 border-t border-white/10 pt-3 md:pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs md:text-sm text-white/70">
                 {gallerySelectionCount
                   ? `${gallerySelectionCount} selected`
                   : "Select images to add them as layers."}
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-2 md:gap-3 sm:flex-row">
                 <Button
                   type="button"
                   variant="ghost"
-                  className="rounded-full text-white/80 hover:text-white"
+                  size="sm"
+                  className="rounded-full text-xs md:text-sm text-white/80 hover:text-white"
                   onClick={handleCloseGalleryDialog}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="button"
-                  className="rounded-full bg-white px-6 py-2 text-black hover:bg-slate-200 disabled:opacity-60"
+                  size="sm"
+                  className="rounded-full bg-white px-4 md:px-6 py-2 text-xs md:text-sm text-black hover:bg-slate-200 disabled:opacity-60"
                   onClick={() => void handleImportSelectedFromGallery()}
                   disabled={
                     !gallerySelectionCount || isImportingFromGallery
@@ -1213,7 +1217,7 @@ export function GeneratorApp({
                 >
                   {isImportingFromGallery ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin text-black" />
+                      <Loader2 className="mr-2 h-3 w-3 md:h-4 md:w-4 animate-spin text-black" />
                       Adding…
                     </>
                   ) : (
@@ -1255,12 +1259,12 @@ function PreviewPanel({
   const previewUrls = resolveJobPreviewUrls(job);
 
   if (isLoading) {
-    return <div className="aspect-[4/3] w-full h-full animate-pulse rounded-[24px] border border-white/15 bg-white/5" />;
+    return <div className="aspect-[4/3] w-full h-full animate-pulse rounded-[16px] md:rounded-[24px] border border-white/15 bg-white/5" />;
   }
 
   if (!previewUrls.length) {
     return (
-      <div className="flex aspect-[4/3] w-full h-full flex-col items-center justify-center gap-2 rounded-[24px] border border-dashed border-white/20 text-center text-xs uppercase tracking-[0.4em] text-white/40">
+      <div className="flex aspect-[4/3] w-full h-full flex-col items-center justify-center gap-2 rounded-[16px] md:rounded-[24px] border border-dashed border-white/20 text-center text-[10px] md:text-xs uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/40">
         Preview
       </div>
     );
@@ -1270,8 +1274,8 @@ function PreviewPanel({
     previewUrls.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1";
 
   return (
-    <div className="space-y-4">
-      <div className={`grid ${gridColumns} gap-4`}>
+    <div className="space-y-3 md:space-y-4">
+      <div className={`grid ${gridColumns} gap-3 md:gap-4`}>
         {previewUrls.map((url, index) => {
           const isActive = selectedUrl === url;
           const toggleSelection = () =>
@@ -1305,25 +1309,25 @@ function PreviewPanel({
               aria-pressed={isActive}
               onClick={toggleSelection}
               onKeyDown={handleKeyDown}
-              className={`group relative aspect-[4/3] w-full cursor-pointer overflow-hidden border border-white/15 ${isActive ? "border-white/80" : ""
+              className={`group relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-[16px] md:rounded-[24px] border border-white/15 ${isActive ? "border-white/80" : ""
                 } bg-black/70 transition hover:border-white/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80`}
             >
-              <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
+              <div className="absolute right-2 top-2 md:right-3 md:top-3 z-10 flex flex-col gap-1.5 md:gap-2">
                 <button
                   type="button"
                   onClick={handleDownloadClick}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   aria-label={`Download cover option ${index + 1}`}
                 >
-                  <Download className="h-4 w-4" />
+                  <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 </button>
                 <button
                   type="button"
                   onClick={handleOpenClick}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   aria-label={`Open cover option ${index + 1} in new tab`}
                 >
-                  <ArrowUpRight className="h-4 w-4" />
+                  <ArrowUpRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 </button>
               </div>
               <NextImage
@@ -1339,7 +1343,8 @@ function PreviewPanel({
                   <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-black/60 backdrop-blur-sm" />
                   <Button
                     type="button"
-                    className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-8 py-4 text-base font-semibold text-black hover:bg-slate-200 disabled:opacity-60"
+                    size="sm"
+                    className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-semibold text-black hover:bg-slate-200 disabled:opacity-60"
                     onClick={(event) => {
                       event.stopPropagation();
                       void onSelect(url);
@@ -1348,7 +1353,7 @@ function PreviewPanel({
                   >
                     {isSavingSelection ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-3.5 w-3.5 md:h-4 md:w-4 animate-spin" />
                         Saving…
                       </>
                     ) : (
@@ -1361,7 +1366,7 @@ function PreviewPanel({
           );
         })}
       </div>
-      <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-white/60">
+      <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/60">
         <span>{job?.status}</span>
         <span>{job?.aspectRatioString}</span>
         {job?.customWidth && job?.customHeight ? (
@@ -1373,7 +1378,8 @@ function PreviewPanel({
       {showCreateNewButton && onCreateNew ? (
         <Button
           type="button"
-          className="h-12 w-full rounded-full border border-white/20 bg-white/10 text-sm font-semibold uppercase tracking-[0.4em] text-white hover:bg-white/20"
+          size="sm"
+          className="h-10 md:h-12 w-full rounded-full border border-white/20 bg-white/10 text-xs md:text-sm font-semibold uppercase tracking-[0.3em] md:tracking-[0.4em] text-white hover:bg-white/20"
           onClick={onCreateNew}
         >
           Create new
@@ -1396,8 +1402,8 @@ function VersionHistoryPanel({
 }: VersionHistoryPanelProps) {
   if (!project) {
     return (
-      <div className="rounded-[32px] border border-white/10 bg-black/20 px-6 py-8 text-center text-white/60">
-        <p className="text-sm">Save a cover to start your personal library.</p>
+      <div className="rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/20 px-4 md:px-6 py-6 md:py-8 text-center text-white/60">
+        <p className="text-xs md:text-sm">Save a cover to start your personal library.</p>
       </div>
     );
   }
@@ -1405,24 +1411,24 @@ function VersionHistoryPanel({
   const hasVersions = project.versions.length > 0;
 
   return (
-    <div className="rounded-[32px] border border-white/10 bg-black/20 px-6 py-8">
+    <div className="rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/20 px-4 md:px-6 py-6 md:py-8">
       <div className="flex items-center gap-3">
         <div className="rounded-full bg-white/10 p-2">
-          <History className="h-5 w-5 text-white" />
+          <History className="h-4 w-4 md:h-5 md:w-5 text-white" />
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.4em] text-white/50">History</p>
-          <p className="text-lg font-semibold text-white">{project.name}</p>
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/50">History</p>
+          <p className="text-base md:text-lg font-semibold text-white">{project.name}</p>
         </div>
       </div>
 
       {hasVersions ? (
-        <div className="mt-6 grid gap-4">
+        <div className="mt-4 md:mt-6 grid gap-3 md:gap-4">
           {project.versions.map((version) => {
             const isActive = selectedVersionId === version.id;
             const createdAt = new Date(version.createdAt);
             const baseClasses =
-              "flex w-full items-center gap-4 rounded-2xl p-3 text-left transition hover:border-white/40";
+              "flex w-full items-center gap-3 md:gap-4 rounded-xl md:rounded-2xl p-2 md:p-3 text-left transition hover:border-white/40";
             const activeClasses = isActive ? " border-white/70" : "";
 
             return (
@@ -1432,7 +1438,7 @@ function VersionHistoryPanel({
                 onClick={() => onSelectVersion(version.id)}
                 className={`${baseClasses}${activeClasses}`}
               >
-                <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-white/10">
+                <div className="relative h-14 w-14 md:h-16 md:w-16 flex-shrink-0 overflow-hidden rounded-lg md:rounded-xl border border-white/10">
                   <NextImage
                     src={version.selectedImageUrl}
                     alt={version.label}
@@ -1441,9 +1447,9 @@ function VersionHistoryPanel({
                     sizes="64px"
                   />
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-white">{version.label}</p>
-                  <p className="text-xs text-white/60">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm md:text-base font-semibold text-white truncate">{version.label}</p>
+                  <p className="text-[10px] md:text-xs text-white/60">
                     v{version.versionNumber} · {createdAt.toLocaleDateString()}
                   </p>
                 </div>
@@ -1452,7 +1458,7 @@ function VersionHistoryPanel({
           })}
         </div>
       ) : (
-        <p className="mt-6 text-sm text-white/60">
+        <p className="mt-4 md:mt-6 text-xs md:text-sm text-white/60">
           Select and save a cover to start building versions for {project.name}.
         </p>
       )}

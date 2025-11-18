@@ -260,7 +260,7 @@ export async function POST(request: Request) {
             thumbnailJobId: null,
             versionNumber: nextVersionNumber,
             label: `${projectRecord.slug}_v${nextVersionNumber}`,
-            selectedImageUrl: primaryAssetUrl,
+            selectedImageUrl: '',
             sourceImage1Url: sourceImageUrls[0],
             sourceImage2Url: sourceImageUrls[1],
             sourceImage3Url: sourceImageUrls[2],

@@ -6,11 +6,10 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { Download, ExternalLink, Loader2, PlayCircle } from "lucide-react";
 import JSZip from "jszip";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { Checkbox } from "../ui/checkbox";
+import { cn } from "@/lib/utils";
 
 export type LibraryProjectSummary = {
     id: string;
@@ -21,6 +20,9 @@ export type LibraryProjectSummary = {
     latestVersion?: {
         id: string;
         selectedImageUrl: string | null;
+        sourceImage1Url: string | null;
+        sourceImage2Url: string | null;
+        sourceImage3Url: string | null;
     } | null;
     librarySelected: boolean;
     libraryGenerationStatus: "WAITING" | "GENERATING" | "COMPLETED" | "FAILED";
@@ -37,28 +39,6 @@ type LibraryResultsResponse = {
         versionNumber: number;
     };
     results: string[];
-};
-
-const STATUS_COPY: Record<
-    LibraryProjectSummary["libraryGenerationStatus"],
-    { label: string; className: string }
-> = {
-    WAITING: {
-        label: "Waiting",
-        className: "bg-yellow-500/10 text-yellow-200 border-yellow-500/40",
-    },
-    GENERATING: {
-        label: "Generating",
-        className: "bg-blue-500/10 text-blue-200 border-blue-500/40",
-    },
-    COMPLETED: {
-        label: "Completed",
-        className: "bg-emerald-500/10 text-emerald-200 border-emerald-500/40",
-    },
-    FAILED: {
-        label: "Failed",
-        className: "bg-red-500/10 text-red-200 border-red-500/40",
-    },
 };
 
 export function LibraryProjectsSection({
@@ -313,127 +293,160 @@ export function LibraryProjectsSection({
     };
 
     return (
-        <section className="flex flex-col gap-6">
+        <section className="flex flex-col gap-4 md:gap-6">
             {selectedCount > 0 ? (
-                <div className="flex flex-col items-center justify-between lg:flex-row gap-4">
-                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[32px] border border-white/10 bg-black/40 px-6 py-4">
+                <div className="flex flex-col gap-3 md:gap-4">
+                    <div className="flex flex-row items-center justify-between gap-3 rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/40 px-6 md:px-6 py-3 md:py-4">
                         <div>
-                            <p className="text-sm text-white/70">
+                            <p className="text-xs md:text-sm text-white/70">
                                 {selectedCount} project{selectedCount === 1 ? "" : "s"} selected
                             </p>
-                            <p className="text-xs text-white/40">
+                            <p className="text-[10px] md:text-xs text-white/40">
                                 Toggle selections below, then create cover images or download existing covers.
                             </p>
                         </div>
-                        {selectedCount ? (
-                            <div className="flex flex-wrap gap-2">
-                                <Button
-                                    type="button"
-                                    onClick={handleQueueGeneration}
-                                    disabled={queuePending}
-                                    className="rounded-full bg-white text-black hover:bg-slate-200"
-                                >
-                                    {queuePending ? (
-                                        <span className="flex items-center gap-2">
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            Starting…
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center gap-2">
-                                            <PlayCircle className="h-4 w-4" />
-                                            Create cover images for selection
-                                        </span>
-                                    )}
-                                </Button>
-                            </div>
-                        ) : null}
-                    </div>
-                    <div className="flex justify-end flex-wrap gap-2">
-                        <Button
-                            type="button"
-                            onClick={handleDownloadAllCovers}
-                            disabled={downloadPending}
-                            variant="outline"
-                            className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-                        >
-                            {downloadPending ? (
-                                <span className="flex items-center gap-2">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Downloading…
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-2">
-                                    <Download className="h-4 w-4" />
-                                    Download all covers
-                                </span>
-                            )}
-                        </Button>
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+                            <Button
+                                type="button"
+                                onClick={handleQueueGeneration}
+                                disabled={queuePending}
+                                size="sm"
+                                className="rounded-full bg-white text-black hover:bg-slate-200 text-xs md:text-sm w-full sm:w-auto"
+                            >
+                                {queuePending ? (
+                                    <span className="flex items-center gap-2">
+                                        <Loader2 className="h-3.5 w-3.5 md:h-4 md:w-4 animate-spin" />
+                                        Starting…
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        <PlayCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                        <span className="hidden sm:inline">Create cover images for selection</span>
+                                        <span className="sm:hidden">Create covers</span>
+                                    </span>
+                                )}
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleDownloadAllCovers}
+                                disabled={downloadPending}
+                                variant="outline"
+                                size="sm"
+                                className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white text-xs md:text-sm w-full sm:w-auto"
+                            >
+                                {downloadPending ? (
+                                    <span className="flex items-center gap-2">
+                                        <Loader2 className="h-3.5 w-3.5 md:h-4 md:w-4 animate-spin" />
+                                        Downloading…
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                        Download all covers
+                                    </span>
+                                )}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             ) : null}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 md:gap-4">
                 {projects.map((project) => {
-                    const status = STATUS_COPY[project.libraryGenerationStatus];
                     const hasPreview = Boolean(project.latestVersion?.selectedImageUrl);
                     const isSelected = selectedProjectIds.has(project.id);
 
                     return (
                         <article
                             key={project.id}
-                            className="flex flex-col gap-4 rounded-[32px] border border-white/10 bg-black/60 p-4 sm:flex-row sm:items-center sm:gap-6"
+                            className="flex flex-col gap-3 md:gap-4 rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/60 p-3 md:p-4"
                         >
-                            <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => toggleSelection(project.id)}
-                                className="size-8 rounded-full border border-white/10 bg-white/5 text-white"
-                            />
-                            <div className="relative h-32 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:w-52">
-                                {hasPreview ? (
-                                    <NextImage
-                                        src={project.latestVersion!.selectedImageUrl ?? ""}
-                                        alt={project.name}
-                                        fill
-                                        className="object-cover"
-                                        sizes="208px"
-                                    />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-[0.4em] text-white/40">
-                                        Pending
+                            <div className="flex items-center gap-3 md:gap-4">
+                                <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleSelection(project.id)}
+                                    className="size-6 md:size-8 rounded-full border border-white/10 bg-white/5 text-white flex-shrink-0 mt-1"
+                                />
+                                <div className="flex flex-row gap-3 md:gap-4 flex-1 min-w-0">
+                                    <div className={cn("relative overflow-hidden rounded-xl md:rounded-2xl border border-white/10 bg-white/5 sm:w-24 md:w-52 flex-shrink-0 min-w-24 min-h-24 aspect-square md:aspect-[4/3]")}>
+                                        {hasPreview ? (
+                                            <NextImage
+                                                src={project.latestVersion!.selectedImageUrl ?? ""}
+                                                alt={project.name}
+                                                fill
+                                                className="object-cover"
+                                                sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
+                                            />
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
+                                                    <NextImage
+                                                        src={project.latestVersion!.sourceImage1Url ?? ""}
+                                                        alt={project.name}
+                                                        fill
+                                                        sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
+                                                    />
+                                                </div>
+                                                {project.latestVersion!.sourceImage2Url ? (
+                                                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
+                                                        <NextImage
+                                                            src={project.latestVersion!.sourceImage2Url ?? ""}
+                                                            alt={project.name}
+                                                            fill
+                                                            sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
+                                                        />
+                                                    </div>
+                                                ) : null}
+                                                {project.latestVersion!.sourceImage3Url ? (
+                                                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
+                                                        <NextImage
+                                                            src={project.latestVersion!.sourceImage3Url ?? ""}
+                                                            alt={project.name}
+                                                            fill
+                                                            sizes="(min-width: 768px) 208px, (min-width: 640px) 176px, 100vw"
+                                                        />
+                                                    </div>
+                                                ) : null}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
 
-                            <div className="flex flex-1 flex-col gap-3">
-                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                    <div>
-                                        <h3 className="text-xl font-semibold text-white">{project.name}</h3>
-                                        <p className="text-sm text-white/60">
-                                            {project.latestVersionNumber} version
-                                            {project.latestVersionNumber === 1 ? "" : "s"} · Updated{" "}
-                                            {new Date(project.updatedAt).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        {project.libraryGenerationStatus === "COMPLETED" ? (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                className="text-white/80 hover:text-white"
-                                                onClick={() => openResultsDialog(project)}
-                                                disabled={
-                                                    resultsLoading && resultsProject?.id === project.id
-                                                }
-                                            >
-                                                {resultsLoading && resultsProject?.id === project.id ? (
-                                                    <span className="flex items-center gap-1">
-                                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                                        Loading…
-                                                    </span>
-                                                ) : (
-                                                    "View results"
+                                    <div className="flex flex-1 flex-row items-center justify-between gap-2 md:gap-3 min-w-0">
+                                        <div className="flex flex-col ">
+                                            <div className="flex flex-row items-center gap-2">
+                                                <h3 className="text-base md:text-lg lg:text-xl font-semibold text-white truncate">{project.name}</h3>
+                                                {!hasPreview && (
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/60 w-fit my-2">No Cover Yet</span>
                                                 )}
-                                            </Button>
-                                        ) : null}
+                                            </div>
+                                            <p className="text-xs md:text-sm text-white/60">
+                                                {project.latestVersionNumber} version
+                                                {project.latestVersionNumber === 1 ? "" : "s"} · Updated{" "}
+                                                {new Date(project.updatedAt).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {project.libraryGenerationStatus === "COMPLETED" ? (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-xs md:text-sm text-white/80 hover:text-white"
+                                                    onClick={() => openResultsDialog(project)}
+                                                    disabled={
+                                                        resultsLoading && resultsProject?.id === project.id
+                                                    }
+                                                >
+                                                    {resultsLoading && resultsProject?.id === project.id ? (
+                                                        <span className="flex items-center gap-1">
+                                                            <Loader2 className="h-3.5 w-3.5 md:h-4 md:w-4 animate-spin" />
+                                                            Loading…
+                                                        </span>
+                                                    ) : (
+                                                        "View results"
+                                                    )}
+                                                </Button>
+                                            ) : null}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -443,50 +456,52 @@ export function LibraryProjectsSection({
             </div>
 
             {resultsProject ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-10">
-                    <div className="w-full max-w-5xl rounded-[32px] border border-white/10 bg-black/90 p-6">
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-                            <div>
-                                <p className="text-sm uppercase tracking-[0.4em] text-white/60">Results</p>
-                                <h3 className="text-2xl font-semibold text-white">{resultsProject.name}</h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-3 md:px-4 py-6 md:py-10">
+                    <div className="w-full max-w-5xl rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/90 p-4 md:p-6 max-h-[95vh] overflow-y-auto">
+                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3 border-b border-white/10 pb-3 md:pb-4">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[10px] md:text-sm uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/60">Results</p>
+                                <h3 className="text-lg md:text-xl lg:text-2xl font-semibold text-white truncate">{resultsProject.name}</h3>
                             </div>
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-white/70 hover:text-white"
+                                size="sm"
+                                className="text-xs md:text-sm text-white/70 hover:text-white"
                                 onClick={closeResultsDialog}
                             >
                                 Close
                             </Button>
                         </div>
 
-                        <div className="mt-6 min-h-[200px]">
+                        <div className="mt-4 md:mt-6 min-h-[200px]">
                             {resultsLoading ? (
-                                <div className="flex items-center justify-center text-white/70">
-                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                <div className="flex items-center justify-center text-white/70 py-8">
+                                    <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" />
                                 </div>
                             ) : resultsError ? (
-                                <p className="text-center text-sm text-red-400">{resultsError}</p>
+                                <p className="text-center text-xs md:text-sm text-red-400 py-8">{resultsError}</p>
                             ) : resultsData?.results?.length ? (
-                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                     {resultsData.results.map((url) => (
                                         <div
                                             key={url}
-                                            className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/60 p-3"
+                                            className="flex flex-col gap-2 md:gap-3 rounded-xl md:rounded-2xl border border-white/10 bg-black/60 p-2.5 md:p-3"
                                         >
-                                            <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10">
+                                            <div className="relative aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl border border-white/10">
                                                 <NextImage
                                                     src={url}
                                                     alt="Generation result"
                                                     fill
                                                     className="object-cover"
-                                                    sizes="(min-width: 1024px) 360px, 90vw"
+                                                    sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
                                                 />
                                             </div>
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-col sm:flex-row flex-wrap gap-2">
                                                 <Button
                                                     type="button"
-                                                    className="rounded-full bg-white text-black hover:bg-slate-200"
+                                                    size="sm"
+                                                    className="rounded-full bg-white text-black hover:bg-slate-200 text-xs md:text-sm w-full sm:w-auto"
                                                     onClick={() => handleSelectResult(url)}
                                                     disabled={selectPending || selectPendingUrl === url}
                                                 >
@@ -495,22 +510,24 @@ export function LibraryProjectsSection({
                                                 <Button
                                                     type="button"
                                                     variant="outline"
-                                                    className="rounded-full border-white/30 text-white/80 hover:text-white"
+                                                    size="sm"
+                                                    className="rounded-full border-white/30 text-white/80 hover:text-white text-xs md:text-sm w-full sm:w-auto"
                                                     asChild
                                                 >
                                                     <a href={url} target="_blank" rel="noreferrer">
-                                                        <ExternalLink className="mr-2 h-4 w-4" />
+                                                        <ExternalLink className="mr-2 h-3 w-3 md:h-4 md:w-4" />
                                                         Open
                                                     </a>
                                                 </Button>
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
-                                                    className="rounded-full text-white/80 hover:text-white"
+                                                    size="sm"
+                                                    className="rounded-full text-white/80 hover:text-white text-xs md:text-sm w-full sm:w-auto"
                                                     asChild
                                                 >
                                                     <a href={url} download>
-                                                        <Download className="mr-2 h-4 w-4" />
+                                                        <Download className="mr-2 h-3 w-3 md:h-4 md:w-4" />
                                                         Download
                                                     </a>
                                                 </Button>
@@ -519,7 +536,7 @@ export function LibraryProjectsSection({
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-center text-sm text-white/60">
+                                <p className="text-center text-xs md:text-sm text-white/60 py-8">
                                     No generation results available for this project.
                                 </p>
                             )}

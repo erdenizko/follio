@@ -52,6 +52,9 @@ export default async function LibraryPage() {
       ? {
         id: project.versions[0].id,
         selectedImageUrl: project.versions[0].selectedImageUrl,
+        sourceImage1Url: project.versions[0].sourceImage1Url,
+        sourceImage2Url: project.versions[0].sourceImage2Url,
+        sourceImage3Url: project.versions[0].sourceImage3Url,
       }
       : null,
     librarySelected: project.librarySelected,
@@ -61,9 +64,9 @@ export default async function LibraryPage() {
 
   return (
     <AppPageLayout label="Library" user={user}>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[32px] border border-white/10 bg-black/20 px-6 py-4">
-        <div className="max-w-2xl">
-          <p className="text-sm text-white/70">
+      <div className="flex flex-row flex-wrap items-center justify-between gap-3 rounded-[32px] border border-white/10 bg-black/20 px-6 py-4">
+        <div className="w-64 md:w-full md:max-w-2xl">
+          <p className="text-xs md:text-sm text-white/70">
             Import a ZIP structured as <code>root/&lt;project-name&gt;/&lt;images&gt;</code> to
             batch create versions in your library.
           </p>

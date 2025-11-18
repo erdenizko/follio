@@ -137,9 +137,9 @@ export function GalleryView({ images, projects }: GalleryViewProps) {
 
   if (!images.length) {
     return (
-      <div className="rounded-[32px] border border-white/10 bg-black/20 px-6 py-16 text-center text-white/60">
-        <p className="text-lg font-medium text-white">No uploads yet</p>
-        <p className="mt-2 text-sm">
+      <div className="rounded-[20px] md:rounded-[32px] border border-white/10 bg-black/20 px-4 md:px-6 py-12 md:py-16 text-center text-white/60">
+        <p className="text-base md:text-lg font-medium text-white">No uploads yet</p>
+        <p className="mt-2 text-xs md:text-sm">
           Create a cover, upload your source assets, and we&apos;ll archive them
           here automatically.
         </p>
@@ -148,22 +148,22 @@ export function GalleryView({ images, projects }: GalleryViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-4 md:gap-8">
+      <div className="flex flex-col gap-3 md:gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-base font-semibold text-white">Uploads</p>
-          <p className="text-sm text-white/60">
+          <p className="text-sm md:text-base font-semibold text-white">Uploads</p>
+          <p className="text-xs md:text-sm text-white/60">
             {filteredImages.length} file
             {filteredImages.length === 1 ? "" : "s"} · {activeProjectLabel}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="min-w-[220px]">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 md:gap-3">
+          <div className="w-full sm:min-w-[200px] md:min-w-[220px]">
             <Select
               value={selectedProject}
               onValueChange={setSelectedProject}
             >
-              <SelectTrigger className="h-11 rounded-2xl border-white/20 bg-black/60 text-slate-100">
+              <SelectTrigger className="h-10 md:h-11 rounded-xl md:rounded-2xl border-white/20 bg-black/60 text-slate-100 text-sm">
                 <SelectValue placeholder="Filter projects" />
               </SelectTrigger>
               <SelectContent>
@@ -181,7 +181,8 @@ export function GalleryView({ images, projects }: GalleryViewProps) {
             <Button
               type="button"
               variant="ghost"
-              className="text-white/80 hover:text-white"
+              size="sm"
+              className="text-xs md:text-sm text-white/80 hover:text-white w-full sm:w-auto"
               onClick={() => setSelectedProject(ALL_VALUE)}
             >
               Clear filter
@@ -191,49 +192,46 @@ export function GalleryView({ images, projects }: GalleryViewProps) {
       </div>
 
       {filteredImages.length === 0 ? (
-        <div className="rounded-[28px] border border-white/10 bg-black/30 px-6 py-12 text-center text-white/60">
-          <p className="text-base text-white/80">
+        <div className="rounded-[18px] md:rounded-[28px] border border-white/10 bg-black/30 px-4 md:px-6 py-8 md:py-12 text-center text-white/60">
+          <p className="text-sm md:text-base text-white/80">
             No uploads match this project.
           </p>
-          <p className="text-sm">
+          <p className="text-xs md:text-sm">
             Try switching back to &ldquo;All projects&rdquo; to see everything.
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-4 xl:grid-cols-5">
           {filteredImages.map((image) => (
             <article
               key={image.id}
-              className="flex flex-col gap-4 rounded-[32px] border border-white/10 bg-black p-3"
+              className="flex flex-row md:flex-col items-center gap-3 md:gap-4 rounded-[20px] md:rounded-[32px] border border-white/10 bg-black p-2.5 md:px-1 md:py-4"
             >
-              <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+              <div className="relative min-w-24 min-h-24 aspect-[4/3] overflow-hidden rounded-lg md:rounded-xl">
                 <NextImage
                   src={image.uploadUrl}
                   alt={image.projectName ?? "Gallery upload"}
                   fill
                   className="object-cover"
-                  sizes="(min-width: 1280px) 320px, (min-width: 768px) 45vw, 90vw"
+                  sizes="(min-width: 1280px) 240px, (min-width: 1024px) 280px, (min-width: 640px) 45vw, 95vw"
                 />
               </div>
-              <div className="flex flex-col gap-2 text-white">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-semibold tracking-tight">
-                    {image.projectName ?? "Untitled project"} <br />
-                    <p className="text-xs text-white/60">
-                      {formatDate(image.createdAt)}
-                    </p>
-                  </h3>
-                  {image.aspectRatioString ? (
-                    <Badge variant="outline" className="border-white/30 text-white/80">
-                      {image.aspectRatioString}
-                    </Badge>
-                  ) : null}
+              <div className="w-full px-2 md:px-4 flex flex-col gap-1.5 md:gap-2 text-white">
+                <div className="flex flex-col">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-sm md:text-base lg:text-lg font-semibold tracking-tight leading-tight flex-1">
+                      {image.projectName ?? "Untitled project"}
+                    </h3>
+                  </div>
+                  <p className="text-[10px] md:text-sm text-white/60">
+                    {formatDate(image.createdAt)}
+                  </p>
                 </div>
-                <ul className="text-xs text-white/70 space-y-1">
+                <ul className="text-[10px] md:text-xs text-white/70 space-y-0.5">
                   <li>Dimensions: {formatDimensions(image.width, image.height)}</li>
                   <li>File size: {formatBytes(image.sizeBytes)}</li>
-                  <li>Type: {image.mimeType}</li>
-                  <li>Checksum: {formatChecksum(image.checksum)}</li>
+                  <li className="hidden sm:block">Type: {image.mimeType}</li>
+                  <li className="hidden md:block">Checksum: {formatChecksum(image.checksum)}</li>
                 </ul>
               </div>
             </article>
