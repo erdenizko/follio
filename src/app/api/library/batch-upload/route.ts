@@ -11,6 +11,10 @@ import { prisma } from "@/lib/prisma";
 import { slugifyProjectName } from "@/lib/utils";
 import type { GenerationImageInput } from "@/lib/validation/generate";
 
+// Configure route to accept larger payloads (200MB for zip files)
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes for large zip uploads
+
 const ZIP_MIME_TYPES = [
   "application/zip",
   "application/x-zip-compressed",

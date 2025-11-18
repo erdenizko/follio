@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "src/app/api/generate/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/gallery/upload/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/library/batch-upload/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}
+

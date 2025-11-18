@@ -50,10 +50,25 @@ export function buildFalWorkflowInput(
   images: GenerationImageInput[],
   aspectRatio: string,
 ): FalWorkflowInput {
+  if (images.length === 0) {
+    throw new Error("At least 1 image is required for generation.");
+  }
+
+  if (!images[0]) {
+    throw new Error("First image is undefined.");
+  }
+
+  // Pad images by duplicating the last available image to reach 3 images
+  const paddedImages = [...images];
+  while (paddedImages.length < 3) {
+    const lastImage = paddedImages[paddedImages.length - 1]!;
+    paddedImages.push(lastImage);
+  }
+
   return {
-    image_url_1: resolveImageSource(images[0]),
-    image_url_2: resolveImageSource(images[1]),
-    image_url_3: resolveImageSource(images[2]),
+    image_url_1: resolveImageSource(paddedImages[0]!),
+    image_url_2: resolveImageSource(paddedImages[1]!),
+    image_url_3: resolveImageSource(paddedImages[2]!),
     aspect_ratio: aspectRatio,
   };
 }

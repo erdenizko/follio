@@ -73,6 +73,7 @@ async function fetchProjects(userId: string, projectIds?: string[]) {
 
 function buildInputsFromAssets(project: ProjectWithAssets): GenerationImageInput[] {
   const galleryInputs = project.galleryImages
+    .filter((asset) => asset.uploadUrl) // Filter out assets without uploadUrl
     .slice(0, REQUIRED_IMAGE_COUNT)
     .map((asset, index) => ({
       id: `${asset.id}-${index}`,
@@ -165,6 +166,15 @@ async function runGenerationForProject(project: ProjectWithAssets, userId: strin
     const uploadedInputs = await ensureImagesHaveCloudinaryUrls(inputs, {
       userId,
     });
+
+    // Validate that all images have uploadUrl
+    const missingUrls = uploadedInputs.filter((img) => !img.uploadUrl);
+    if (missingUrls.length > 0) {
+      throw new Error(
+        `${missingUrls.length} image(s) are missing uploadUrl after Cloudinary upload.`,
+      );
+    }
+
     const sanitized = uploadedInputs.map(sanitizeImageMetadata);
 
     const placeholders = [

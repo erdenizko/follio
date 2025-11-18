@@ -9,6 +9,10 @@ import { persistGalleryUploads } from "@/lib/gallery";
 import { sanitizeImageMetadata } from "@/lib/generation";
 import type { GenerationImageInput } from "@/lib/validation/generate";
 
+// Configure route to accept larger payloads (200MB for zip files)
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes for large zip uploads
+
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
 const ZIP_MIME_TYPES = [
   "application/zip",

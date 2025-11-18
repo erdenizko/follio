@@ -130,9 +130,17 @@ export async function ensureImagesHaveCloudinaryUrls(
         },
       });
 
+      const uploadUrl = uploadResult.secure_url ?? uploadResult.url;
+      
+      if (!uploadUrl) {
+        throw new Error(
+          `Cloudinary upload succeeded but returned no URL for image "${image.name}".`,
+        );
+      }
+
       return {
         ...image,
-        uploadUrl: uploadResult.secure_url ?? uploadResult.url,
+        uploadUrl,
         base64: undefined,
         sizeBytes: uploadResult.bytes ?? image.sizeBytes,
         width: image.width ?? uploadResult.width ?? undefined,

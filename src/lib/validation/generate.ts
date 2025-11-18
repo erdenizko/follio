@@ -29,7 +29,10 @@ export const createGenerationSchema = z.object({
   aspectRatioId: z.string().min(1),
   customWidth: z.number().int().positive().nullable(),
   customHeight: z.number().int().positive().nullable(),
-  images: z.array(generationImageSchema).nonempty(),
+  images: z
+    .array(generationImageSchema)
+    .min(1, "At least 1 image is required.")
+    .max(3, "Maximum 3 images are allowed."),
 });
 
 export const historyQuerySchema = z.object({

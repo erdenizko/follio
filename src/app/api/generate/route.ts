@@ -28,6 +28,10 @@ import {
 } from "@/lib/validation/generate";
 import { slugifyProjectName } from "@/lib/utils";
 
+// Configure route to accept larger payloads (10MB)
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes for generation
+
 const MODEL_ID = process.env.FAL_WORKFLOW_PATH ?? "workflows/erdenizkorkmaz1/cover-generator";
 
 function assertCustomDimensions(
@@ -93,6 +97,21 @@ export async function POST(request: Request) {
       throw new Error("Unable to upload images to Cloudinary.");
     }
 
+    // Validate that all images have uploadUrl
+    const missingUrls = uploadedImages.filter((img) => !img.uploadUrl);
+    if (missingUrls.length > 0) {
+      throw new Error(
+        `${missingUrls.length} image(s) are missing uploadUrl after Cloudinary upload.`,
+      );
+    }
+
+    // Pad images by duplicating the last image to reach 3 images for storage
+    const paddedImages = [...uploadedImages];
+    while (paddedImages.length < 3) {
+      const lastImage = paddedImages[paddedImages.length - 1]!;
+      paddedImages.push(lastImage);
+    }
+
     const payloadWithUploads: CreateGenerationInput = {
       ...payload,
       images: uploadedImages as CreateGenerationInput["images"],
@@ -115,7 +134,7 @@ export async function POST(request: Request) {
     );
 
     const falInput = buildFalWorkflowInput(uploadedImages, aspectRatioString);
-    const sanitizedImages = uploadedImages.map(sanitizeImageMetadata);
+    const sanitizedImages = paddedImages.map(sanitizeImageMetadata);
     const galleryUploads = uploadedImages.map((uploadedImage, index) => ({
       original: parsedPayload.images[index] ?? uploadedImage,
       uploaded: uploadedImage,
@@ -130,9 +149,9 @@ export async function POST(request: Request) {
         aspectRatioString,
         customWidth: payloadWithUploads.customWidth ?? null,
         customHeight: payloadWithUploads.customHeight ?? null,
-        inputImage1: sanitizedImages[0] as Prisma.InputJsonValue,
-        inputImage2: sanitizedImages[1] as Prisma.InputJsonValue,
-        inputImage3: sanitizedImages[2] as Prisma.InputJsonValue,
+        inputImage1: sanitizedImages[0]! as Prisma.InputJsonValue,
+        inputImage2: sanitizedImages[1]! as Prisma.InputJsonValue,
+        inputImage3: sanitizedImages[2]! as Prisma.InputJsonValue,
         inputImagesMetadata: sanitizedImages as Prisma.InputJsonValue,
         projectName: normalizedProjectName,
         projectSlug,
